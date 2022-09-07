@@ -9,132 +9,92 @@ class GildedRose {
 
     public void updateQuality() {
         for (Item item : items) {
-            MyItem myItem = MyItemFactory.getItem(item);
-            Item newItem = myItem.apply();
-            item.quality = newItem.quality;
-            item.sellIn = newItem.sellIn;
+            ItemHelper itemHelper = ItemFactory.getItem(item);
+            itemHelper.apply(item);
         }
     }
 
-    static abstract class MyItem extends Item {
-        public MyItem(String name, int sellIn, int quality) {
-            super(name, sellIn, quality);
+    static abstract class ItemHelper {
+        void increaseQuality(Item item) {
+            item.quality = Math.min(item.quality + 1, 50);
         }
 
-        void increaseQuality() {
-            this.quality = Math.min(this.quality + 1, 50);
+        void decreaseQuality(Item item) {
+            decreaseQuality(item, 1);
         }
 
-        void decreaseQuality() {
-            decreaseQuality(1);
+        void decreaseQuality(Item item, int rate) {
+            item.quality = Math.max(item.quality - rate, 0);
         }
 
-        void decreaseQuality(int rate) {
-            this.quality = Math.max(this.quality - rate, 0);
-        }
-
-        abstract Item apply();
+        abstract void apply(Item item);
     }
 
-    static class MyItemFactory {
-        public static MyItem getItem(Item item) {
+    static class ItemFactory {
+        public static ItemHelper getItem(Item item) {
             return switch (item.name) {
-                case "Aged Brie" -> new AgedBrieItem(item);
-                case "Backstage passes to a TAFKAL80ETC concert" -> new BackstageItem(item);
-                case "Sulfuras, Hand of Ragnaros" -> new SulfurItem(item);
-                case "Conjured" -> new ConjuredItem(item);
-                default -> new OtherItem(item);
+                case "Aged Brie" -> new AgedBrieItemHelper();
+                case "Backstage passes to a TAFKAL80ETC concert" -> new BackstageItemHelper();
+                case "Sulfuras, Hand of Ragnaros" -> new SulfurItemHelper();
+                case "Conjured" -> new ConjuredItemHelper();
+                default -> new OtherItemHelper();
             };
         }
     }
 
-    static class AgedBrieItem extends MyItem {
-        public AgedBrieItem(Item item) {
-            super(item.name, item.sellIn, item.quality);
-        }
-
+    static class AgedBrieItemHelper extends ItemHelper {
         @Override
-        Item apply() {
-            increaseQuality();
-
-            this.sellIn -= 1;
-
-            if (this.sellIn < 0) {
-                increaseQuality();
+        void apply(Item item) {
+            increaseQuality(item);
+            item.sellIn -= 1;
+            if (item.sellIn < 0) {
+                increaseQuality(item);
             }
-            return this;
         }
     }
 
-    static class BackstageItem extends MyItem {
-        public BackstageItem(Item item) {
-            super(item.name, item.sellIn, item.quality);
-        }
-
+    static class BackstageItemHelper extends ItemHelper {
         @Override
-        Item apply() {
-            increaseQuality();
+        void apply(Item item) {
+            increaseQuality(item);
 
-            if (this.quality < 50 && this.sellIn < 11) {
-                increaseQuality();
+            if (item.quality < 50 && item.sellIn < 11) {
+                increaseQuality(item);
+            }
+            if (item.quality < 50 && item.sellIn < 6) {
+                increaseQuality(item);
             }
 
-            if (this.quality < 50 && this.sellIn < 6) {
-                increaseQuality();
+            item.sellIn -= 1;
+            if (item.sellIn < 0) {
+                item.quality = 0;
             }
-
-            this.sellIn -= 1;
-
-            if (this.sellIn < 0) {
-                this.quality = 0;
-            }
-            return this;
         }
-
     }
 
-    static class SulfurItem extends MyItem {
-        public SulfurItem(Item item) {
-            super(item.name, item.sellIn, item.quality);
-        }
-
+    static class SulfurItemHelper extends ItemHelper {
         @Override
-        Item apply() {
+        void apply(Item item) {
             // Being a legendary item, never has to be sold or decreases in Quality
-            return this;
         }
     }
 
-    static class OtherItem extends MyItem {
-        public OtherItem(Item item) {
-            super(item.name, item.sellIn, item.quality);
-        }
-
+    static class OtherItemHelper extends ItemHelper {
         @Override
-        Item apply() {
-            decreaseQuality();
-
-            this.sellIn -= 1;
-
-            if (this.sellIn < 0) {
-                decreaseQuality();
+        void apply(Item item) {
+            decreaseQuality(item);
+            item.sellIn -= 1;
+            if (item.sellIn < 0) {
+                decreaseQuality(item);
             }
-            return this;
         }
     }
 
-    static class ConjuredItem extends MyItem {
-        public ConjuredItem(Item item) {
-            super(item.name, item.sellIn, item.quality);
-        }
-
+    static class ConjuredItemHelper extends ItemHelper {
         @Override
-        Item apply() {
-            decreaseQuality(2);
-
-            this.sellIn -= 1;
-
-            return this;
+        void apply(Item item) {
+            decreaseQuality(item, 2);
+            item.sellIn -= 1;
         }
     }
 

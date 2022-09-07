@@ -77,5 +77,31 @@ class GildedRoseTest {
         assertEquals(2, app.items[0].sellIn);
     }
 
+    // Q inc by 2 when days <= 10
+    // Q inc by 3 when days <= 5
+    // Q == 0 when days == 0
+    @Test
+    void whenNameIsBackstage_shouldIncreaseQualityBy2ForSellingLessThan10() {
+        Item[] items = new Item[]{new Item("Backstage passes to a TAFKAL80ETC concert", 10, 2)};
+        GildedRose app = new GildedRose(items);
+        app.updateQuality();
+        assertEquals(4, app.items[0].quality);
+    }
+
+    @Test
+    void whenNameIsBackstage_shouldIncreaseQualityBy3ForSellingLessThan5() {
+        Item[] items = new Item[]{new Item("Backstage passes to a TAFKAL80ETC concert", 5, 2)};
+        GildedRose app = new GildedRose(items);
+        app.updateQuality();
+        assertEquals(5, app.items[0].quality);
+    }
+
+    @Test
+    void whenNameIsBackstage_shouldIncreaseQualityBy3ForAfterConcert() {
+        Item[] items = new Item[]{new Item("Backstage passes to a TAFKAL80ETC concert", 0, 2)};
+        GildedRose app = new GildedRose(items);
+        app.updateQuality();
+        assertEquals(0, app.items[0].quality);
+    }
 
 }

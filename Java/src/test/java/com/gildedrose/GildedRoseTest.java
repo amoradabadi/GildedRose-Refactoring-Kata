@@ -37,4 +37,14 @@ class GildedRoseTest {
         assertTrue(app.items[0].quality >= 0);
     }
 
+    @Test
+    void whenNameIsAgedBrie_shouldIncreaseQuality() {
+        Item[] items = new Item[]{new Item("Aged Brie", 2, 2)};
+        GildedRose app = new GildedRose(items);
+        app.updateQuality();
+        assertEquals(3, app.items[0].quality);
+        app.updateQuality();
+        assertEquals(4, app.items[0].quality);
+    }
+
 }

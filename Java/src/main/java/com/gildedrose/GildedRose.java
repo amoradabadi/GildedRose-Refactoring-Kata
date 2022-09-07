@@ -12,6 +12,18 @@ class GildedRose {
             super(name, sellIn, quality);
         }
 
+        void increaseQuality() {
+            if (this.quality < 50) {
+                this.quality += 1;
+            }
+        }
+
+        void decreaseQuality() {
+            if (this.quality > 0) {
+                this.quality -= 1;
+            }
+        }
+
         abstract Item apply();
     }
 
@@ -33,16 +45,12 @@ class GildedRose {
 
         @Override
         Item apply() {
-            if (this.quality < 50) {
-                this.quality += 1;
-            }
+            increaseQuality();
 
             this.sellIn -= 1;
 
             if (this.sellIn < 0) {
-                if (this.quality < 50) {
-                    this.quality += 1;
-                }
+                increaseQuality();
             }
             return this;
         }
@@ -55,20 +63,14 @@ class GildedRose {
 
         @Override
         Item apply() {
-            if (this.quality < 50) {
-                this.quality += 1;
+            increaseQuality();
 
-                if (this.sellIn < 11) {
-                    if (this.quality < 50) {
-                        this.quality += 1;
-                    }
-                }
+            if (this.quality < 50 && this.sellIn < 11) {
+                increaseQuality();
+            }
 
-                if (this.sellIn < 6) {
-                    if (this.quality < 50) {
-                        this.quality += 1;
-                    }
-                }
+            if (this.quality < 50 && this.sellIn < 6) {
+                increaseQuality();
             }
 
             this.sellIn -= 1;
@@ -78,6 +80,7 @@ class GildedRose {
             }
             return this;
         }
+
     }
 
     static class SulfurItem extends MyItem {
@@ -99,16 +102,12 @@ class GildedRose {
 
         @Override
         Item apply() {
-            if (this.quality > 0) {
-                this.quality -= 1;
-            }
+            decreaseQuality();
 
             this.sellIn -= 1;
 
             if (this.sellIn < 0) {
-                if (this.quality > 0) {
-                    this.quality -= 1;
-                }
+                decreaseQuality();
             }
             return this;
         }

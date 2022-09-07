@@ -106,15 +106,13 @@ class GildedRoseTest {
     }
 
     @Test
-    @Disabled
-        // Enable this when adding the functionality after refactoring
     void whenConjured_shouldDegradesTwiceAsFast() {
         Item[] items = new Item[]{new Item("Conjured", 10, 5)};
         GildedRose app = new GildedRose(items);
         app.updateQuality();
-        assertEquals(4, app.items[0].quality);
+        assertEquals(3, app.items[0].quality);
         app.updateQuality();
-        assertEquals(2, app.items[0].quality);
+        assertEquals(1, app.items[0].quality);
         app.updateQuality();
         assertEquals(0, app.items[0].quality);
     }

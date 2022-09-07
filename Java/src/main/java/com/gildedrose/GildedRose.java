@@ -19,8 +19,15 @@ class GildedRose {
         }
 
         void decreaseQuality() {
-            if (this.quality > 0) {
-                this.quality -= 1;
+            decreaseQuality(1);
+        }
+
+        void decreaseQuality(int rate) {
+            int i = 0;
+            while (i++ < rate) {
+                if (this.quality > 0) {
+                    this.quality -= 1;
+                }
             }
         }
 
@@ -33,6 +40,7 @@ class GildedRose {
                 case "Aged Brie" -> new AgedBrieItem(item);
                 case "Backstage passes to a TAFKAL80ETC concert" -> new BackstageItem(item);
                 case "Sulfuras, Hand of Ragnaros" -> new SulfurItem(item);
+                case "Conjured" -> new ConjuredItem(item);
                 default -> new OtherItem(item);
             };
         }
@@ -109,6 +117,21 @@ class GildedRose {
             if (this.sellIn < 0) {
                 decreaseQuality();
             }
+            return this;
+        }
+    }
+
+    static class ConjuredItem extends MyItem {
+        public ConjuredItem(Item item) {
+            super(item.name, item.sellIn, item.quality);
+        }
+
+        @Override
+        Item apply() {
+            decreaseQuality(2);
+
+            this.sellIn -= 1;
+
             return this;
         }
     }

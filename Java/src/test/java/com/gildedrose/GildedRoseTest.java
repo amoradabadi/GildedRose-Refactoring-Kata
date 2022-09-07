@@ -57,4 +57,25 @@ class GildedRoseTest {
         assertEquals(50, app.items[0].quality);
     }
 
+    @Test
+    void whenUpdatingQualityForSulfurs_shouldNotDecreaseQuality() {
+        Item[] items = new Item[]{new Item("Sulfuras, Hand of Ragnaros", 2, 5)};
+        GildedRose app = new GildedRose(items);
+        app.updateQuality();
+        assertEquals(5, app.items[0].quality);
+        app.updateQuality();
+        assertEquals(5, app.items[0].quality);
+    }
+
+    @Test
+    void whenUpdatingQualityForSulfurs_shouldNotSell() {
+        Item[] items = new Item[]{new Item("Sulfuras, Hand of Ragnaros", 2, 5)};
+        GildedRose app = new GildedRose(items);
+        app.updateQuality();
+        assertEquals(2, app.items[0].sellIn);
+        app.updateQuality();
+        assertEquals(2, app.items[0].sellIn);
+    }
+
+
 }

@@ -1,6 +1,17 @@
 package com.gildedrose;
 
+import java.util.Map;
+
 class GildedRose {
+    private static final int MAX_QUALITY = 50;
+    private static final int MIN_QUALITY = 0;
+    private final Map<String, ItemHelper> itemHelperMap = Map.of(
+        "Aged Brie", new AgedBrieItemHelper(),
+        "Backstage passes to a TAFKAL80ETC concert", new BackstageItemHelper(),
+        "Sulfuras, Hand of Ragnaros", new ItemHelper() {
+        },
+        "Conjured", new ConjuredItemHelper()
+    );
     Item[] items;
 
     public GildedRose(Item[] items) {
@@ -9,92 +20,86 @@ class GildedRose {
 
     public void updateQuality() {
         for (Item item : items) {
-            ItemHelper itemHelper = ItemFactory.getItem(item);
+            ItemHelper itemHelper = getItem(item);
             itemHelper.apply(item);
         }
     }
 
-    static abstract class ItemHelper {
-        void increaseQuality(Item item) {
-            item.quality = Math.min(item.quality + 1, 50);
+    private ItemHelper getItem(Item item) {
+        return itemHelperMap.getOrDefault(item.name, new OtherItemHelper());
+    }
+
+    private interface ItemHelper {
+        default void increaseQuality(Item item) {
+            increaseQuality(item, 1);
         }
 
-        void decreaseQuality(Item item) {
+        default void increaseQuality(Item item, int rate) {
+            item.quality = Math.min(item.quality + rate, MAX_QUALITY);
+        }
+
+        default void decreaseQuality(Item item) {
             decreaseQuality(item, 1);
         }
 
-        void decreaseQuality(Item item, int rate) {
-            item.quality = Math.max(item.quality - rate, 0);
+        default void decreaseQuality(Item item, int rate) {
+            item.quality = Math.max(item.quality - rate, MIN_QUALITY);
         }
 
-        abstract void apply(Item item);
-    }
-
-    static class ItemFactory {
-        public static ItemHelper getItem(Item item) {
-            return switch (item.name) {
-                case "Aged Brie" -> new AgedBrieItemHelper();
-                case "Backstage passes to a TAFKAL80ETC concert" -> new BackstageItemHelper();
-                case "Sulfuras, Hand of Ragnaros" -> new SulfurItemHelper();
-                case "Conjured" -> new ConjuredItemHelper();
-                default -> new OtherItemHelper();
-            };
-        }
-    }
-
-    static class AgedBrieItemHelper extends ItemHelper {
-        @Override
-        void apply(Item item) {
-            increaseQuality(item);
+        default void decreaseSellIn(Item item) {
             item.sellIn -= 1;
+        }
+
+        default void apply(Item item) {
+            // Override this method when needed
+        }
+    }
+
+    private static class AgedBrieItemHelper implements ItemHelper {
+        @Override
+        public void apply(Item item) {
+            increaseQuality(item);
+            decreaseSellIn(item);
             if (item.sellIn < 0) {
                 increaseQuality(item);
             }
         }
     }
 
-    static class BackstageItemHelper extends ItemHelper {
+    private static class BackstageItemHelper implements ItemHelper {
         @Override
-        void apply(Item item) {
+        public void apply(Item item) {
             increaseQuality(item);
 
-            if (item.quality < 50 && item.sellIn < 11) {
-                increaseQuality(item);
-            }
-            if (item.quality < 50 && item.sellIn < 6) {
+            if (item.sellIn < 6) {
+                increaseQuality(item, 2);
+            } else if (item.sellIn < 11) {
                 increaseQuality(item);
             }
 
-            item.sellIn -= 1;
+            decreaseSellIn(item);
             if (item.sellIn < 0) {
                 item.quality = 0;
             }
         }
     }
 
-    static class SulfurItemHelper extends ItemHelper {
+    private static class OtherItemHelper implements ItemHelper {
         @Override
-        void apply(Item item) {
-            // Being a legendary item, never has to be sold or decreases in Quality
-        }
-    }
-
-    static class OtherItemHelper extends ItemHelper {
-        @Override
-        void apply(Item item) {
+        public void apply(Item item) {
             decreaseQuality(item);
-            item.sellIn -= 1;
+            decreaseSellIn(item);
             if (item.sellIn < 0) {
                 decreaseQuality(item);
             }
         }
     }
 
-    static class ConjuredItemHelper extends ItemHelper {
+    private static class ConjuredItemHelper implements ItemHelper {
         @Override
-        void apply(Item item) {
+        public void apply(Item item) {
             decreaseQuality(item, 2);
-            item.sellIn -= 1;
+            decreaseSellIn(item);
         }
     }
 
